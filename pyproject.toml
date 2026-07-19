@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "seismic_survey_design"
+version = "0.0.1"
+description = "2D/3D Seismic Survey Design tool"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [{ name = "Alexander Jüstel", email = "alexander.juestel@ieg.fraunhofer.de" }]
+keywords = ["seismic", "survey design", "preplot", "prepermitting", "geospatial"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+]
+
+dependencies = [
+    "numpy>=1.24",
+    "shapely>=2.0",
+    "geopandas>=0.13",
+    "matplotlib>=3.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.4",
+    "black>=24.0",
+    "mypy>=1.8",
+]
+
+[project.urls]
+Homepage = ""
+Repository = "https://github.com/AlexanderJuestel/seismic_survey_design.git"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "NPY"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --cov=cmp_binning"
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
