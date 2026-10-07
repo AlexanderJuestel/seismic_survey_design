@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "seismic_survey_design"
 version = "0.0.1"
-description = "2D/3D Seismic Survey Design tool"
+description = "3D Seismic Survey Design tool"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
