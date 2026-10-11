@@ -23,39 +23,49 @@ dependencies = [
     "shapely>=2.0",
     "geopandas>=0.13",
     "matplotlib>=3.7",
+    "pyproj>=3.6",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
-    "ruff>=0.4",
-    "black>=24.0",
+    "ruff>=0.17",
     "mypy>=1.8",
 ]
 
 [project.urls]
-Homepage = ""
+Homepage = "https://github.com/AlexanderJuestel/seismic_survey_design"
 Repository = "https://github.com/AlexanderJuestel/seismic_survey_design.git"
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["."]
+include = ["seismic_survey_design*"]
 
 [tool.ruff]
-line-length = 100
-target-version = "py310"
+line-length = 88
+target-version = "py311"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "NPY"]
+select = [
+    "E",    # pycodestyle: Stil- und Formatierungsprobleme
+    "F",    # Pyflakes: ungenutzte Imports, undefinierte Namen usw.
+    "I",    # isort: Imports sortieren
+    "UP",   # pyupgrade: moderne Python-Syntax
+    "B",    # flake8-bugbear: häufige Fehlerquellen
+]
 
-[tool.black]
-line-length = 100
-target-version = ["py310"]
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra --cov=cmp_binning"
+addopts = "-ra"
 
 [tool.mypy]
 python_version = "3.11"
+files = ["seismic_survey_design"]
 ignore_missing_imports = true
+show_error_codes = true
+pretty = true
