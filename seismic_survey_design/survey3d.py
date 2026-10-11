@@ -8,67 +8,79 @@ class Survey3D:
     Define a 3D seismic survey design and its target parameters.
 
     The class stores project metadata, the coordinate reference system
-    (CRS), target parameters, acquisition and geometry parameters.
+    (CRS), target parameters, and geometric properties of the target.
 
-    Numeric parameters are validated during initialization.
+    Numeric parameters are validated during initialization. Target
+    depths and offsets must be positive when provided. The maximum
+    target depth must exceed the minimum target depth.
 
-    Attributes:
-        design_name (str | None):
-            Name of the survey design.
-        project_name (str | None):
-            Name of the project.
-        project_location (str | None):
-            Geographic or administrative location of the project.
-        license_name (str | None):
-            Name of the license or licensed area.
-        crs (pyproj.CRS):
-            Coordinate reference system used for the survey.
-        target_name_shallow (str | None):
-            Name of the shallow target horizon or target.
-        target_name_deep (str | None):
-            Name of the deep target horizon or target.
-        z_min (float | None):
-            Minimum target depth. Must be greater than zero if provided.
-        z_max (float | None):
-            Maximum target depth. Must be greater than zero and greater
-            than ``z_min`` if both are provided.
-        x_min (float | None):
-            Minimum target offset, set equal to ``z_min``.
-        x_max (float | None):
-            Maximum target offset. Defaults to ``z_max`` if omitted and
-            must be greater than or equal to ``x_min`` when both exist.
-        x_max_to_z_max_ratio (float | None):
-            Ratio of ``x_max`` to ``z_max``, if both are defined.
-        theta_inline (float | None):
-            Target dip angle in the inline direction, in degrees.
-            Must be strictly between 0 and 90 degrees if provided.
-        theta_crossline (float | None):
-            Target dip angle in the crossline direction, in degrees.
-            Must be strictly between 0 and 90 degrees if provided.
-        target_size (float | None):
-            Characteristic target size in the units used by the survey.
-            Must be greater than zero if provided.
+    Parameters
+    ----------
+    design_name : str or None, optional
+        Name assigned to the survey design.
+    project_name : str or None, optional
+        Name of the associated project.
+    project_location : str or None, optional
+        Geographic or administrative location of the project.
+    license_name : str or None, optional
+        Name of the relevant license or licensed area.
+    target_name_shallow : str or None, optional
+        Name of the shallow target horizon.
+    target_name_deep : str or None, optional
+        Name of the deep target horizon.
+    z_min : float or int or None, optional
+        Minimum target depth. Must be greater than zero if provided.
+    z_max : float or int or None, optional
+        Maximum target depth. Must be greater than zero and greater
+        than ``z_min`` if both are provided.
+    x_max : float or int or None, optional
+        Maximum target offset. Defaults to ``z_max`` if omitted.
+        Must be greater than or equal to ``x_min`` when both exist.
+    target_size : float or int or None, optional
+        Characteristic target size in the units used by the survey.
+        Must be greater than zero if provided.
+    theta_inline : float or int or None, optional
+        Target dip angle in the inline direction, in degrees.
+        Must be strictly between 0 and 90 degrees if provided.
+    theta_crossline : float or int or None, optional
+        Target dip angle in the crossline direction, in degrees.
+        Must be strictly between 0 and 90 degrees if provided.
+    crs : str or pyproj.CRS, optional
+        Coordinate reference system identifier or CRS object.
+        Defaults to ``"EPSG:25832"``.
 
-    Args:
-        design_name: Name assigned to this survey design.
-        project_name: Name of the associated project.
-        project_location: Location of the project.
-        license_name: Name of the relevant license area.
-        target_name_shallow: Name of the shallow target.
-        target_name_deep: Name of the deep target.
-        z_min: Minimum target depth.
-        z_max: Maximum target depth.
-        x_max: Maximum target offset. Defaults to ``z_max``.
-        target_size: Characteristic target size.
-        theta_inline: Inline target dip angle in degrees.
-        theta_crossline: Crossline target dip angle in degrees.
-        crs: CRS identifier string or ``pyproj.CRS`` object.
-            Defaults to ``"EPSG:25832"``.
-
-    Raises:
-        TypeError: If a parameter has an unsupported data type.
-        ValueError: If a parameter has an invalid value or the target
-            depth and offset constraints are violated.
+    Attributes
+    ----------
+    design_name : str or None
+        Name assigned to the survey design.
+    project_name : str or None
+        Name of the associated project.
+    project_location : str or None
+        Geographic or administrative location of the project.
+    license_name : str or None
+        Name of the relevant license or licensed area.
+    target_name_shallow : str or None
+        Name of the shallow target horizon.
+    target_name_deep : str or None
+        Name of the deep target horizon.
+    z_min : float or None
+        Minimum target depth.
+    z_max : float or None
+        Maximum target depth.
+    x_min : float or None
+        Minimum target offset.
+    x_max : float or None
+        Maximum target offset.
+    x_max_to_z_max_ratio : float or None
+        Ratio of ``x_max`` to ``z_max`` when both are defined.
+    target_size : float or None
+        Characteristic target size in the units used by the survey.
+    theta_inline : float or None
+        Target dip angle in the inline direction, in degrees.
+    theta_crossline : float or None
+        Target dip angle in the crossline direction, in degrees.
+    crs : pyproj.CRS
+        Coordinate reference system used for the survey.
     """
 
     def __init__(

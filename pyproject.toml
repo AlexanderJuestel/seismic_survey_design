@@ -36,6 +36,11 @@ dev = [
     "twine>=7.0.0",
 ]
 
+docs = [
+    "sphinx>=8.0",
+    "myst-parser>=4.0",
+]
+
 [project.urls]
 Homepage = "https://github.com/AlexanderJuestel/seismic_survey_design"
 Repository = "https://github.com/AlexanderJuestel/seismic_survey_design.git"
