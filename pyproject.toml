@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=64", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,30 +8,32 @@ version = "0.0.1"
 description = "3D Seismic Survey Design tool"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { file = "LICENSE" }
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
 authors = [{ name = "Alexander Jüstel", email = "alexander.juestel@ieg.fraunhofer.de" }]
 keywords = ["seismic", "survey design", "preplot", "prepermitting", "geospatial"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Operating System :: OS Independent",
     "Intended Audience :: Science/Research",
 ]
 
 dependencies = [
-    "numpy>=1.24",
-    "shapely>=2.0",
-    "geopandas>=0.13",
-    "matplotlib>=3.7",
-    "pyproj>=3.6",
+    "numpy>=2.5.4",
+    "shapely>=2.2.0",
+    "geopandas>=1.2.0",
+    "matplotlib>=3.11.2",
+    "pyproj>=3.8.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0",
-    "pytest-cov>=4.0",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
     "ruff>=0.17",
-    "mypy>=1.8",
+    "mypy>=2.4.0",
+    "build>=1.6.1",
+    "twine>=7.0.0",
 ]
 
 [project.urls]
