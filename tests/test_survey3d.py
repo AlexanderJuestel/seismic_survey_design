@@ -26,6 +26,8 @@ class TestSurvey3D:
             == "POINT (0 0)"
         )
 
+        assert survey.survey_rotation == 0.0
+
         assert survey.z_min is None
         assert survey.z_max is None
         assert survey.x_min is None
@@ -50,6 +52,7 @@ class TestSurvey3D:
             target_area_center_point_gdf_local=gpd.GeoDataFrame(
                 geometry=[Point(100, 100)]
             ),
+            survey_rotation=50,
             z_min=50,
             z_max=4000,
             theta_inline=30,
@@ -70,6 +73,7 @@ class TestSurvey3D:
             == "POINT (100 100)"
         )
 
+        assert survey.survey_rotation == 50
         assert survey.z_min == 50
         assert survey.z_max == 4000
         assert survey.x_min == 50
@@ -347,3 +351,27 @@ class TestSurvey3D:
             100, 100
         )
         assert survey.target_area_center_point_gdf_local.crs is None
+
+        # ------------------------------------------------------------------
+
+    # Survey rotation
+    # ------------------------------------------------------------------
+
+    @pytest.mark.parametrize("value", [True, "survey_rotation"])
+    def test_rejects_invalid_survey_rotation_types(self, value):
+        """survey_rotation should reject unsupported types."""
+        with pytest.raises(TypeError, match="survey_rotation"):
+            Survey3D(survey_rotation=value)
+
+    @pytest.mark.parametrize("value", [-5, -1, -0.1, 360, 360.1, 400])
+    def test_rejects_rotation_angle_outside_valid_range(self, value):
+        """Survey rotation must be in the interval [0, 360)."""
+        with pytest.raises(ValueError, match="survey_rotation"):
+            Survey3D(survey_rotation=value)
+
+    @pytest.mark.parametrize("value", [0, 0.0, 50, 180, 359.9])
+    def test_accepts_valid_survey_rotation(self, value):
+        """Survey rotation within [0, 360) should be accepted."""
+        survey = Survey3D(survey_rotation=value)
+
+        assert survey.survey_rotation == value

@@ -104,6 +104,7 @@ class Survey3D:
         theta_inline: float | None = None,
         theta_crossline: float | None = None,
         target_area_center_point_gdf_local: str | gpd.GeoDataFrame | None = None,
+        survey_rotation: float | int = 0.0,
         crs: str | pyproj.CRS = "EPSG:25832",
     ) -> None:
         #################################################
@@ -204,4 +205,12 @@ class Survey3D:
             reference_system="local",
             geom_type="Point",
             crs=None,
+        )
+
+        # Survey Rotation
+        self.survey_rotation = _validate_float_int(
+            arg=survey_rotation,
+            name="survey_rotation",
+            greater_than=-1,
+            smaller_than=360,
         )
