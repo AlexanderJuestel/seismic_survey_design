@@ -1,5 +1,7 @@
+import geopandas as gpd
 import pyproj
 import pytest
+from shapely.geometry import Point, Polygon
 
 from seismic_survey_design.survey3d import Survey3D
 
@@ -17,6 +19,12 @@ class TestSurvey3D:
         assert survey.license_name is None
         assert survey.target_name_shallow is None
         assert survey.target_name_deep is None
+
+        assert isinstance(survey.target_area_center_point_gdf_local, gpd.GeoDataFrame)
+        assert (
+            survey.target_area_center_point_gdf_local.iloc[0].geometry.wkt
+            == "POINT (0 0)"
+        )
 
         assert survey.z_min is None
         assert survey.z_max is None
@@ -39,6 +47,9 @@ class TestSurvey3D:
             license_name="Aachen-Weisweiler",
             target_name_shallow="Base Tertiary",
             target_name_deep="Kohlenkalk/Massenkalk",
+            target_area_center_point_gdf_local=gpd.GeoDataFrame(
+                geometry=[Point(100, 100)]
+            ),
             z_min=50,
             z_max=4000,
             theta_inline=30,
@@ -53,6 +64,11 @@ class TestSurvey3D:
         assert survey.license_name == "Aachen-Weisweiler"
         assert survey.target_name_shallow == "Base Tertiary"
         assert survey.target_name_deep == "Kohlenkalk/Massenkalk"
+        assert isinstance(survey.target_area_center_point_gdf_local, gpd.GeoDataFrame)
+        assert (
+            survey.target_area_center_point_gdf_local.iloc[0].geometry.wkt
+            == "POINT (100 100)"
+        )
 
         assert survey.z_min == 50
         assert survey.z_max == 4000
@@ -283,3 +299,51 @@ class TestSurvey3D:
         """An invalid CRS string should raise ValueError."""
         with pytest.raises(ValueError, match="Invalid CRS"):
             Survey3D(crs="kein-koordinatensystem")
+
+    # ------------------------------------------------------------------
+    # Target Area
+    # ------------------------------------------------------------------
+
+    @pytest.mark.parametrize("value", [True, 0, 0.1])
+    def test_rejects_invalid_target_area_center_point_gdf_local_types(self, value):
+        """target_area_center_point_gdf_local should reject unsupported types."""
+        with pytest.raises(TypeError):
+            Survey3D(target_area_center_point_gdf_local=value)
+
+    @pytest.mark.parametrize("value", ["invalid_file_path"])
+    def test_rejects_invalid_target_area_center_point_gdf_local_filepath(self, value):
+        """target_area_center_point_gdf_local should reject unavailable files."""
+        with pytest.raises(FileNotFoundError):
+            Survey3D(target_area_center_point_gdf_local=value)
+
+    def test_rejects_empty_target_area_center_point_gdf_local(self):
+        """An empty target area GeoDataFrame should be rejected."""
+        with pytest.raises(ValueError, match="empty"):
+            Survey3D(target_area_center_point_gdf_local=gpd.GeoDataFrame(geometry=[]))
+
+    def test_rejects_multiple_target_area_center_points_local(self):
+        """Multiple geometries should be rejected."""
+        gdf = gpd.GeoDataFrame(geometry=[Point(100, 100), Point(200, 200)])
+
+        with pytest.raises(ValueError, match="exactly one geometry"):
+            Survey3D(target_area_center_point_gdf_local=gdf)
+
+    def test_rejects_wrong_target_area_center_geometry_type(self):
+        """A polygon should be rejected when a point is expected."""
+        gdf = gpd.GeoDataFrame(
+            geometry=[Polygon([(0, 0), (100, 0), (100, 100), (0, 100), (0, 0)])]
+        )
+
+        with pytest.raises(ValueError, match="Expected geometry type 'Point'"):
+            Survey3D(target_area_center_point_gdf_local=gdf)
+
+    def test_accepts_local_target_area_center_point_without_crs(self):
+        """Local coordinates should not require a CRS."""
+        gdf = gpd.GeoDataFrame(geometry=[Point(100, 100)])
+
+        survey = Survey3D(target_area_center_point_gdf_local=gdf)
+
+        assert survey.target_area_center_point_gdf_local.geometry.iloc[0] == Point(
+            100, 100
+        )
+        assert survey.target_area_center_point_gdf_local.crs is None

@@ -1,6 +1,12 @@
+import geopandas as gpd
 import pyproj
+from shapely.geometry import Point
 
-from seismic_survey_design.io import _validate_float_int, _validate_string
+from seismic_survey_design.io import (
+    _validate_float_int,
+    _validate_gdf,
+    _validate_string,
+)
 
 
 class Survey3D:
@@ -97,6 +103,7 @@ class Survey3D:
         target_size: float | None = None,
         theta_inline: float | None = None,
         theta_crossline: float | None = None,
+        target_area_center_point_gdf_local: str | gpd.GeoDataFrame | None = None,
         crs: str | pyproj.CRS = "EPSG:25832",
     ) -> None:
         #################################################
@@ -123,7 +130,7 @@ class Survey3D:
         #################################################
         # Target
         #################################################
-        # Target Depths
+        # Target Names
         self.target_name_shallow = _validate_string(
             arg=target_name_shallow, name="target_name_shallow"
         )
@@ -132,6 +139,7 @@ class Survey3D:
             arg=target_name_deep, name="target_name_deep"
         )
 
+        # Target Depths
         self.z_min = _validate_float_int(arg=z_min, name="z_min", greater_than=0)
 
         self.z_max = _validate_float_int(arg=z_max, name="z_max", greater_than=0)
@@ -143,13 +151,13 @@ class Survey3D:
         ):
             raise ValueError("'z_max' must be greater than 'z_min'")
 
+        # Target Offsets
         validated_x_max = _validate_float_int(
             arg=x_max,
             name="x_max",
             greater_than=0,
         )
 
-        # Target Offsets
         self.x_min = self.z_min
         self.x_max = self.z_max if validated_x_max is None else validated_x_max
 
@@ -160,17 +168,19 @@ class Survey3D:
         ):
             raise ValueError("'x_max' must be greater than or equal to 'x_min'")
 
+        # Target Offset Ratio
         self.x_max_to_z_max_ratio = (
             self.x_max / self.z_max
             if self.x_max is not None and self.z_max is not None
             else None
         )
 
-        # Target Dipping Angle
+        # Target Dipping Angle Inline
         self.theta_inline = _validate_float_int(
             arg=theta_inline, name="theta_inline", greater_than=0, smaller_than=90
         )
 
+        # Target Dipping Angle Crossline
         self.theta_crossline = _validate_float_int(
             arg=theta_crossline, name="theta_crossline", greater_than=0, smaller_than=90
         )
@@ -178,4 +188,20 @@ class Survey3D:
         # Target Size
         self.target_size = _validate_float_int(
             arg=target_size, name="target_size", greater_than=0
+        )
+
+        #################################################
+        # Target Area
+        #################################################
+        # Target Area Center Point Local
+        if target_area_center_point_gdf_local is None:
+            target_area_center_point_gdf_local = gpd.GeoDataFrame(
+                geometry=[Point(0, 0)]
+            )
+
+        self.target_area_center_point_gdf_local = _validate_gdf(
+            arg=target_area_center_point_gdf_local,
+            reference_system="local",
+            geom_type="Point",
+            crs=None,
         )
