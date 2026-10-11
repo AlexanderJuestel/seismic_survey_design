@@ -19,7 +19,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "numpy>=2.5.4",
+    "numpy>=2.4.6",
     "shapely>=2.2.0",
     "geopandas>=1.2.0",
     "matplotlib>=3.11.2",
