@@ -1,6 +1,6 @@
 import pyproj
 
-from seismic_survey_design.io import _validate_string, _validate_float_int
+from seismic_survey_design.io import _validate_float_int, _validate_string
 
 
 class Survey3D:
