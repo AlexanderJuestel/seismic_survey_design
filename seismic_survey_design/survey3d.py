@@ -9,7 +9,7 @@ class Survey3D:
 
     The class stores project metadata, the coordinate reference system
     (CRS), target parameters, acquisition and geometry parameters.
-    
+
     Numeric parameters are validated during initialization.
 
     Attributes:
@@ -71,39 +71,37 @@ class Survey3D:
             depth and offset constraints are violated.
     """
 
-    def __init__(self,
-                 design_name: str | None = None,
-                 project_name: str | None = None,
-                 project_location: str | None = None,
-                 license_name: str | None = None,
-                 target_name_shallow: str | None = None,
-                 target_name_deep: str | None = None,
-                 z_min: float | None = None,
-                 z_max: float | None = None,
-                 x_max: float | None = None,
-                 target_size: float | None = None,
-                 theta_inline: float | None = None,
-                 theta_crossline: float | None = None,
-                 crs: str | pyproj.CRS = 'EPSG:25832') -> None:
+    def __init__(
+        self,
+        design_name: str | None = None,
+        project_name: str | None = None,
+        project_location: str | None = None,
+        license_name: str | None = None,
+        target_name_shallow: str | None = None,
+        target_name_deep: str | None = None,
+        z_min: float | None = None,
+        z_max: float | None = None,
+        x_max: float | None = None,
+        target_size: float | None = None,
+        theta_inline: float | None = None,
+        theta_crossline: float | None = None,
+        crs: str | pyproj.CRS = "EPSG:25832",
+    ) -> None:
         #################################################
         # General
         #################################################
-        self.design_name = _validate_string(arg=design_name,
-                                            name='design_name')
+        self.design_name = _validate_string(arg=design_name, name="design_name")
 
-        self.project_name = _validate_string(arg=project_name,
-                                             name='project_name')
+        self.project_name = _validate_string(arg=project_name, name="project_name")
 
-        self.project_location = _validate_string(arg=project_location,
-                                                 name='project_location')
+        self.project_location = _validate_string(
+            arg=project_location, name="project_location"
+        )
 
-        self.license_name = _validate_string(arg=license_name,
-                                             name='license_name')
+        self.license_name = _validate_string(arg=license_name, name="license_name")
 
         if not isinstance(crs, (str, pyproj.CRS)):
-            raise TypeError(
-                "The CRS must be provided as a string or pyproj CRS object"
-            )
+            raise TypeError("The CRS must be provided as a string or pyproj CRS object")
 
         try:
             self.crs = pyproj.CRS.from_user_input(crs)
@@ -114,20 +112,18 @@ class Survey3D:
         # Target
         #################################################
         # Target Depths
-        self.target_name_shallow = _validate_string(arg=target_name_shallow,
-                                                    name='target_name_shallow')                
+        self.target_name_shallow = _validate_string(
+            arg=target_name_shallow, name="target_name_shallow"
+        )
 
-        self.target_name_deep = _validate_string(arg=target_name_deep,
-                                                 name='target_name_deep')
+        self.target_name_deep = _validate_string(
+            arg=target_name_deep, name="target_name_deep"
+        )
 
-        self.z_min = _validate_float_int(arg=z_min,
-                                         name='z_min',
-                                         greater_than=0)
+        self.z_min = _validate_float_int(arg=z_min, name="z_min", greater_than=0)
 
-        self.z_max = _validate_float_int(arg=z_max,
-                                         name='z_max',
-                                         greater_than=0)
-        
+        self.z_max = _validate_float_int(arg=z_max, name="z_max", greater_than=0)
+
         if (
             self.z_min is not None
             and self.z_max is not None
@@ -158,18 +154,16 @@ class Survey3D:
             else None
         )
 
-        # Target Dipping Angle 
-        self.theta_inline = _validate_float_int(arg=theta_inline,
-                                                name='theta_inline',
-                                                greater_than=0,
-                                                smaller_than=90)
-            
-        self.theta_crossline = _validate_float_int(arg=theta_crossline,
-                                                   name='theta_crossline',
-                                                   greater_than=0,
-                                                   smaller_than=90)
+        # Target Dipping Angle
+        self.theta_inline = _validate_float_int(
+            arg=theta_inline, name="theta_inline", greater_than=0, smaller_than=90
+        )
+
+        self.theta_crossline = _validate_float_int(
+            arg=theta_crossline, name="theta_crossline", greater_than=0, smaller_than=90
+        )
 
         # Target Size
-        self.target_size = _validate_float_int(arg=target_size,
-                                               name='target_size',
-                                               greater_than=0)
+        self.target_size = _validate_float_int(
+            arg=target_size, name="target_size", greater_than=0
+        )
