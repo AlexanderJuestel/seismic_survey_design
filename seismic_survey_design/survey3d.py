@@ -2,6 +2,7 @@ import geopandas as gpd
 import pyproj
 from shapely.geometry import Point
 
+from seismic_survey_design.geometry import transform_to_local
 from seismic_survey_design.io import (
     _validate_float_int,
     _validate_gdf,
@@ -104,6 +105,7 @@ class Survey3D:
         theta_inline: float | None = None,
         theta_crossline: float | None = None,
         target_area_center_point_gdf_local: str | gpd.GeoDataFrame | None = None,
+        target_area_gdf_global: str | gpd.GeoDataFrame | None = None,
         survey_rotation: float | int = 0.0,
         crs: str | pyproj.CRS = "EPSG:25832",
     ) -> None:
@@ -214,3 +216,32 @@ class Survey3D:
             greater_than=-1,
             smaller_than=360,
         )
+
+        if target_area_gdf_global is not None:
+            self.target_area_gdf_global = _validate_gdf(
+                arg=target_area_gdf_global,
+                reference_system="global",
+                geom_type="Polygon",
+                crs=self.crs,
+            )
+
+            self.target_area_center_point_gdf_global = _validate_gdf(
+                arg=gpd.GeoDataFrame(
+                    geometry=[self.target_area_gdf_global.geometry.iloc[0].centroid],
+                    crs=self.crs,
+                ),
+                reference_system="global",
+                geom_type="Point",
+                crs=self.crs,
+            )
+
+            self.target_area_gdf_local = transform_to_local(
+                gdf=self.target_area_gdf_global,
+                center=self.target_area_center_point_gdf_global,
+                angle=self.survey_rotation,
+                origin=gpd.GeoDataFrame(geometry=[Point(0, 0)]),
+            )
+        else:
+            self.target_area_gdf_global = target_area_gdf_global
+            self.target_area_center_point_gdf_global = None
+            self.target_area_gdf_local = None

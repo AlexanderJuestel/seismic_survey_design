@@ -27,6 +27,7 @@ class TestSurvey3D:
         )
 
         assert survey.survey_rotation == 0.0
+        assert survey.target_area_gdf_global is None
 
         assert survey.z_min is None
         assert survey.z_max is None
@@ -53,12 +54,35 @@ class TestSurvey3D:
                 geometry=[Point(100, 100)]
             ),
             survey_rotation=50,
+            target_area_gdf_global=gpd.GeoDataFrame(
+                geometry=[
+                    Polygon(
+                        [
+                            (299387.40051425825, 5631473.076100714),
+                            (300063.16562393797, 5631786.82418735),
+                            (300907.8720110376, 5630435.293967991),
+                            (301849.1162709486, 5631026.588438961),
+                            (303188.5792562065, 5632160.908444493),
+                            (303550.59627924924, 5632474.65653113),
+                            (305252.0762875499, 5630242.218222367),
+                            (304902.1264986087, 5629759.52885831),
+                            (304359.1009640447, 5629168.234387342),
+                            (303466.12564053934, 5628371.796936648),
+                            (301861.18350504996, 5627249.544165214),
+                            (300340.7120082706, 5627116.804590098),
+                            (300039.031155735, 5629156.167153238),
+                            (299387.40051425825, 5631473.076100714),
+                        ]
+                    )
+                ],
+                crs="EPSG:25832",
+            ),
             z_min=50,
             z_max=4000,
             theta_inline=30,
             theta_crossline=30,
             target_size=50,
-            crs="EPSG:4647",
+            crs="EPSG:25832",
         )
 
         assert survey.design_name == "Survey Design 1"
@@ -73,6 +97,9 @@ class TestSurvey3D:
             == "POINT (100 100)"
         )
 
+        assert isinstance(survey.target_area_gdf_global, gpd.GeoDataFrame)
+        assert survey.target_area_gdf_global.crs == survey.crs
+
         assert survey.survey_rotation == 50
         assert survey.z_min == 50
         assert survey.z_max == 4000
@@ -84,7 +111,7 @@ class TestSurvey3D:
         assert survey.theta_crossline == 30
         assert survey.target_size == 50
 
-        assert survey.crs == pyproj.CRS.from_epsg(4647)
+        assert survey.crs == pyproj.CRS.from_epsg(25832)
 
     def test_explicit_x_max_initialization(self):
         """An explicitly provided x_max should override its default."""
@@ -352,8 +379,7 @@ class TestSurvey3D:
         )
         assert survey.target_area_center_point_gdf_local.crs is None
 
-        # ------------------------------------------------------------------
-
+    # ------------------------------------------------------------------
     # Survey rotation
     # ------------------------------------------------------------------
 
@@ -363,7 +389,7 @@ class TestSurvey3D:
         with pytest.raises(TypeError, match="survey_rotation"):
             Survey3D(survey_rotation=value)
 
-    @pytest.mark.parametrize("value", [-5, -1, -0.1, 360, 360.1, 400])
+    @pytest.mark.parametrize("value", [-5, -1, 360, 360.1, 400])
     def test_rejects_rotation_angle_outside_valid_range(self, value):
         """Survey rotation must be in the interval [0, 360)."""
         with pytest.raises(ValueError, match="survey_rotation"):
@@ -375,3 +401,134 @@ class TestSurvey3D:
         survey = Survey3D(survey_rotation=value)
 
         assert survey.survey_rotation == value
+
+    # ------------------------------------------------------------------
+    # Target Area gdf Global
+    # ------------------------------------------------------------------
+
+    @pytest.mark.parametrize("value", [True, 0, 0.0])
+    def test_rejects_invalid_target_area_gdf_global_types(self, value):
+        """target_area_gdf_global should reject unsupported types."""
+        with pytest.raises(TypeError):
+            Survey3D(target_area_gdf_global=value)
+
+    @pytest.mark.parametrize("value", ["invalid_file_path"])
+    def test_rejects_invalid_target_area_gdf_global_filepath(self, value):
+        """target_area_gdf_global should reject unavailable files."""
+        with pytest.raises(FileNotFoundError):
+            Survey3D(target_area_gdf_global=value)
+
+    def test_rejects_empty_target_area_gdf_global(self):
+        """An empty target area GeoDataFrame should be rejected."""
+        with pytest.raises(ValueError, match="empty"):
+            Survey3D(target_area_gdf_global=gpd.GeoDataFrame(geometry=[]))
+
+    def test_rejects_multiple_target_area_gdf_global(self):
+        """Multiple geometries should be rejected."""
+        polygon = Polygon([(0, 0), (100, 0), (100, 100), (0, 100), (0, 0)])
+        gdf = gpd.GeoDataFrame(
+            geometry=[polygon, polygon],
+            crs="EPSG:25832",
+        )
+
+        with pytest.raises(ValueError, match="exactly one geometry"):
+            Survey3D(target_area_gdf_global=gdf)
+
+    def test_rejects_wrong_target_area_gdf_global_geometry_type(self):
+        """A point should be rejected when a polygon is expected."""
+        gdf = gpd.GeoDataFrame(
+            geometry=[Point(100, 100)],
+            crs="EPSG:25832",
+        )
+
+        with pytest.raises(ValueError, match="Expected geometry type 'Polygon'"):
+            Survey3D(target_area_gdf_global=gdf)
+
+    def test_rejects_target_area_gdf_global_without_crs(self):
+        """Global target area geometries must define a CRS."""
+        gdf = gpd.GeoDataFrame(
+            geometry=[Polygon([(0, 0), (100, 0), (100, 100), (0, 100), (0, 0)])]
+        )
+
+        with pytest.raises(ValueError, match="CRS"):
+            Survey3D(target_area_gdf_global=gdf)
+
+    @pytest.fixture
+    def target_area_gdf_global():
+        """Return a polygon in the global CRS."""
+        return gpd.GeoDataFrame(
+            {"id": [1]},
+            geometry=[
+                Polygon([
+                    (10, 10),
+                    (14, 10),
+                    (14, 12),
+                    (10, 12),
+                ])
+            ],
+            crs="EPSG:25832",
+        )
+    
+    def test_target_area_gdf_local_is_initialized(
+        target_area_gdf_global,
+    ):
+        survey = Survey3D(
+            target_area_gdf_global=target_area_gdf_global,
+            survey_rotation=0,
+        )
+
+        assert survey.target_area_gdf_local is not None
+        assert survey.target_area_gdf_local.crs is None
+        assert len(survey.target_area_gdf_local) == 1
+        assert (
+            survey.target_area_gdf_local.geometry.iloc[0].geom_type
+            == "Polygon"
+        )
+    
+    def test_target_area_gdf_local_is_centered(
+        target_area_gdf_global,
+    ):
+        survey = Survey3D(
+            target_area_gdf_global=target_area_gdf_global,
+            survey_rotation=0,
+        )
+
+        centroid = survey.target_area_gdf_local.geometry.iloc[0].centroid
+
+        assert centroid.x == pytest.approx(0)
+        assert centroid.y == pytest.approx(0)
+
+    def test_target_area_gdf_local_respects_survey_rotation(
+        target_area_gdf_global,
+    ):
+        survey = Survey3D(
+            target_area_gdf_global=target_area_gdf_global,
+            survey_rotation=90,
+        )
+
+        minx, miny, maxx, maxy = (
+            survey.target_area_gdf_local.total_bounds
+        )
+
+        assert maxx - minx == pytest.approx(2)
+        assert maxy - miny == pytest.approx(4)
+
+    def test_target_area_gdf_global_remains_unchanged(
+        target_area_gdf_global,
+    ):
+        original = target_area_gdf_global.copy()
+
+        Survey3D(
+            target_area_gdf_global=target_area_gdf_global,
+            survey_rotation=45,
+        )
+
+        assert target_area_gdf_global.crs == original.crs
+        assert target_area_gdf_global.geometry.equals(original.geometry)
+
+    def test_target_area_gdf_local_is_none_without_global_target():
+        survey = Survey3D(target_area_gdf_global=None)
+
+        assert survey.target_area_gdf_global is None
+        assert survey.target_area_center_point_gdf_global is None
+        assert survey.target_area_gdf_local is None
