@@ -128,6 +128,7 @@ def test_transform_to_local_accepts_explicit_origin(
     assert result.crs is None
     assert len(result) == 1
 
+
 def test_transform_to_local_uses_explicit_origin(valid_gdf, valid_center):
     origin = gpd.GeoDataFrame(
         geometry=[Point(1, 0)],
@@ -143,6 +144,7 @@ def test_transform_to_local_uses_explicit_origin(valid_gdf, valid_center):
     assert result.crs is None
     assert len(result) == 1
     assert result.geometry.iloc[0].is_valid
+
 
 def test_transform_to_local_uses_default_rotation_origin(valid_gdf, valid_center):
     result = transform_to_local(

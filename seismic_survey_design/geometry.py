@@ -9,7 +9,7 @@ def transform_to_local(
     origin: gpd.GeoDataFrame | None = None,
 ) -> gpd.GeoDataFrame:
     """Transform global geometries into a local coordinate system.
-    
+
     The center point is translated to (0, 0), and the geometries
     are rotated by -angle degrees. The returned GeoDataFrame has
     no CRS assigned.
@@ -26,13 +26,13 @@ def transform_to_local(
 
     if gdf.crs is None or center.crs is None:
         raise ValueError("CRS of gdf and center must be defined.")
-    
+
     if gdf.crs != center.crs:
-        raise ValueError('CRS of gdf and center must be the same.')
-    
+        raise ValueError("CRS of gdf and center must be the same.")
+
     if len(center) != 1 or center.geometry.iloc[0].geom_type != "Point":
         raise ValueError("center must contain exactly one Point.")
-    
+
     center_point = center.geometry.iloc[0]
 
     if origin is not None:
@@ -42,17 +42,13 @@ def transform_to_local(
     else:
         rotation_origin = Point(0, 0)
 
-    geom = (
-        gdf.geometry
-        .translate(
-            xoff=-center_point.x,
-            yoff=-center_point.y,
-        )
-        .rotate(
-            angle=-angle,
-            origin=rotation_origin,
-            use_radians=False,
-        )
+    geom = gdf.geometry.translate(
+        xoff=-center_point.x,
+        yoff=-center_point.y,
+    ).rotate(
+        angle=-angle,
+        origin=rotation_origin,
+        use_radians=False,
     )
 
     result = gdf.copy()

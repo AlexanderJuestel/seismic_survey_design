@@ -459,16 +459,18 @@ class TestSurvey3D:
         return gpd.GeoDataFrame(
             {"id": [1]},
             geometry=[
-                Polygon([
-                    (10, 10),
-                    (14, 10),
-                    (14, 12),
-                    (10, 12),
-                ])
+                Polygon(
+                    [
+                        (10, 10),
+                        (14, 10),
+                        (14, 12),
+                        (10, 12),
+                    ]
+                )
             ],
             crs="EPSG:25832",
         )
-    
+
     def test_target_area_gdf_local_is_initialized(
         target_area_gdf_global,
     ):
@@ -480,11 +482,8 @@ class TestSurvey3D:
         assert survey.target_area_gdf_local is not None
         assert survey.target_area_gdf_local.crs is None
         assert len(survey.target_area_gdf_local) == 1
-        assert (
-            survey.target_area_gdf_local.geometry.iloc[0].geom_type
-            == "Polygon"
-        )
-    
+        assert survey.target_area_gdf_local.geometry.iloc[0].geom_type == "Polygon"
+
     def test_target_area_gdf_local_is_centered(
         target_area_gdf_global,
     ):
@@ -506,9 +505,7 @@ class TestSurvey3D:
             survey_rotation=90,
         )
 
-        minx, miny, maxx, maxy = (
-            survey.target_area_gdf_local.total_bounds
-        )
+        minx, miny, maxx, maxy = survey.target_area_gdf_local.total_bounds
 
         assert maxx - minx == pytest.approx(2)
         assert maxy - miny == pytest.approx(4)

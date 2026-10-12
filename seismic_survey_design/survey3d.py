@@ -2,14 +2,11 @@ import geopandas as gpd
 import pyproj
 from shapely.geometry import Point
 
+from seismic_survey_design.geometry import transform_to_local
 from seismic_survey_design.io import (
     _validate_float_int,
     _validate_gdf,
     _validate_string,
-)
-
-from seismic_survey_design.geometry import (
-    transform_to_local
 )
 
 
@@ -115,18 +112,15 @@ class Survey3D:
         #################################################
         # General
         #################################################
-        self.design_name = _validate_string(arg=design_name, 
-                                            name="design_name")
+        self.design_name = _validate_string(arg=design_name, name="design_name")
 
-        self.project_name = _validate_string(arg=project_name, 
-                                             name="project_name")
+        self.project_name = _validate_string(arg=project_name, name="project_name")
 
         self.project_location = _validate_string(
             arg=project_location, name="project_location"
         )
 
-        self.license_name = _validate_string(arg=license_name, 
-                                             name="license_name")
+        self.license_name = _validate_string(arg=license_name, name="license_name")
 
         if not isinstance(crs, (str, pyproj.CRS)):
             raise TypeError("The CRS must be provided as a string or pyproj CRS object")
@@ -141,23 +135,17 @@ class Survey3D:
         #################################################
         # Target Names
         self.target_name_shallow = _validate_string(
-            arg=target_name_shallow, 
-            name="target_name_shallow"
+            arg=target_name_shallow, name="target_name_shallow"
         )
 
         self.target_name_deep = _validate_string(
-            arg=target_name_deep, 
-            name="target_name_deep"
+            arg=target_name_deep, name="target_name_deep"
         )
 
         # Target Depths
-        self.z_min = _validate_float_int(arg=z_min, 
-                                         name="z_min", 
-                                         greater_than=0)
+        self.z_min = _validate_float_int(arg=z_min, name="z_min", greater_than=0)
 
-        self.z_max = _validate_float_int(arg=z_max, 
-                                         name="z_max", 
-                                         greater_than=0)
+        self.z_max = _validate_float_int(arg=z_max, name="z_max", greater_than=0)
 
         if (
             self.z_min is not None
@@ -192,25 +180,17 @@ class Survey3D:
 
         # Target Dipping Angle Inline
         self.theta_inline = _validate_float_int(
-            arg=theta_inline, 
-            name="theta_inline", 
-            greater_than=0, 
-            smaller_than=90
+            arg=theta_inline, name="theta_inline", greater_than=0, smaller_than=90
         )
 
         # Target Dipping Angle Crossline
         self.theta_crossline = _validate_float_int(
-            arg=theta_crossline, 
-            name="theta_crossline", 
-            greater_than=0, 
-            smaller_than=90
+            arg=theta_crossline, name="theta_crossline", greater_than=0, smaller_than=90
         )
 
         # Target Size
         self.target_size = _validate_float_int(
-            arg=target_size, 
-            name="target_size", 
-            greater_than=0
+            arg=target_size, name="target_size", greater_than=0
         )
 
         #################################################
@@ -247,17 +227,19 @@ class Survey3D:
 
             self.target_area_center_point_gdf_global = _validate_gdf(
                 arg=gpd.GeoDataFrame(
-                    geometry=[
-                        self.target_area_gdf_global.geometry.iloc[0].centroid], 
-                        crs=self.crs),
-                reference_system='global',
-                geom_type='Point',
-                crs=self.crs)
-            
+                    geometry=[self.target_area_gdf_global.geometry.iloc[0].centroid],
+                    crs=self.crs,
+                ),
+                reference_system="global",
+                geom_type="Point",
+                crs=self.crs,
+            )
+
             self.target_area_gdf_local = transform_to_local(
                 gdf=self.target_area_gdf_global,
                 center=self.target_area_center_point_gdf_global,
-                angle=self.survey_rotation)
+                angle=self.survey_rotation,
+            )
         else:
             self.target_area_gdf_global = None
             self.target_area_center_point_gdf_global = None
